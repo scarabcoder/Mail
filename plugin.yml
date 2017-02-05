@@ -1,0 +1,6 @@
+name: Mail
+version: 1.0
+main: com.scarabcoder.mail.Main
+commands:
+    mail:
+        description: Mail command
