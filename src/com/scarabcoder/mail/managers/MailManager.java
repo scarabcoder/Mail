@@ -1,5 +1,6 @@
 package com.scarabcoder.mail.managers;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,9 @@ public class MailManager {
 	
 	public static boolean removeMail(int id){
 		try {
-			PreparedStatement st = Main.getConnection().prepareStatement("DELETE FROM ScarabMail WHERE id=" + id);
+			
+			PreparedStatement st = Main.getConnection().prepareStatement("DELETE FROM ScarabMail WHERE id=?");
+			st.setInt(1, id);
 			return st.executeUpdate() > 0;
 		} catch (SQLException e) {
 			
@@ -26,11 +29,12 @@ public class MailManager {
 	public static List<Mail> getMailsFromDate(String date){
 		List<Mail> mails = new ArrayList<Mail>();
 		
-		String query = "SELECT * FROM ScarabMail WHERE date between '" + date + "' and '" + date + "'";
-		
-		ResultSet mailQuery = Main.executeQuery(query);
 		
 		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("SELECT * FROM ScarabMail WHERE date between ? and ?");
+			st.setDate(1, Date.valueOf(date));
+			st.setDate(2, Date.valueOf(date));
+			ResultSet mailQuery = st.executeQuery();
 			while(mailQuery.next()){
 				mails.add(new Mail(mailQuery));
 			}

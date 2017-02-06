@@ -45,6 +45,8 @@ public class ChatMessage {
 	public static final String BLOCKEDPLAYER = Main.prefix + "Blocked player.";
 
 	public static final String UNBLOCKEDPLAYER = Main.prefix + "Unblocked player.";
+
+	public static final String PLAYERCOMMAND = Main.prefix + ChatColor.RED + "Player-only command!";
 	
 	
 }

@@ -11,7 +11,6 @@ import java.sql.Statement;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -99,8 +98,9 @@ public class Main extends JavaPlugin{
 		
 	}
 	
+	
+	
 	private void generateConfigDefaults(){
-		FileConfiguration config = this.getConfig();
 		this.saveDefaultConfig();
 	}
 	
@@ -153,15 +153,18 @@ public class Main extends JavaPlugin{
 	
 	
 	private static void populateSchema(){
-		 String createTable = "CREATE TABLE IF NOT EXISTS `PluginData`.`ScarabMailUsers` ( `uuid` VARCHAR(32) NOT NULL, `username` VARCHAR(16) NULL, `blocked` LONGTEXT NULL, PRIMARY KEY (`uuid`));";
+		
+		String tableName = getPlugin().getConfig().getString("mysql-schema");
+		
+		 String createTable = "CREATE TABLE IF NOT EXISTS `" + tableName + "`.`ScarabMailUsers` ( `uuid` VARCHAR(32) NOT NULL, `username` VARCHAR(16) NULL, `blocked` LONGTEXT NULL, PRIMARY KEY (`uuid`));";
          
          executeUpdate(createTable);
          
-         createTable = "CREATE TABLE IF NOT EXISTS `PluginData`.`ScarabMail` ( `id` INT NOT NULL AUTO_INCREMENT, `content` MEDIUMTEXT NULL, `receiver` VARCHAR(32) NULL, `sender` VARCHAR(32) NULL, `date` DATETIME NULL, `fromname` VARCHAR(16) NULL, `toname` VARCHAR(16) NULL, PRIMARY KEY (`id`));";
+         createTable = "CREATE TABLE IF NOT EXISTS `" + tableName + "`.`ScarabMail` ( `id` INT NOT NULL AUTO_INCREMENT, `content` MEDIUMTEXT NULL, `receiver` VARCHAR(32) NULL, `sender` VARCHAR(32) NULL, `date` DATETIME NULL, `fromname` VARCHAR(16) NULL, `toname` VARCHAR(16) NULL, PRIMARY KEY (`id`));";
          
          executeUpdate(createTable);
          
-         createTable = "CREATE TABLE IF NOT EXISTS `PluginData`.`ScarabMailFilter` ( `id` INT NOT NULL AUTO_INCREMENT, `word` VARCHAR(32) NULL, PRIMARY KEY (`id`) );";
+         createTable = "CREATE TABLE IF NOT EXISTS `" + tableName + "`.`ScarabMailFilter` ( `id` INT NOT NULL AUTO_INCREMENT, `word` VARCHAR(32) NULL, PRIMARY KEY (`id`) );";
          
          executeUpdate(createTable);
 	}

@@ -20,21 +20,6 @@ public class Mail {
 
 	private String toName;
 	
-	public Mail(int id){
-		this.id = id;
-		
-		ResultSet set = Main.executeQuery("SELECT * FROM ScarabMail WHERE id='" + id + "'");
-		
-		try {
-			set.next();	
-			this.author = set.getString("from");
-			this.receiver = set.getString("to");
-			this.message = set.getString("content");
-			this.date = set.getDate("date");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public Mail(ResultSet set){
 		try {

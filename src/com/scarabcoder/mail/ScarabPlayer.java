@@ -31,7 +31,7 @@ public class ScarabPlayer {
 	}
 	
 	public String getID(){
-		return id.toString();
+		return id.toString().replaceAll("-", "");
 	}
 	
 	
@@ -41,13 +41,20 @@ public class ScarabPlayer {
 	
 	public void blockPlayer(String id){
 		
-		ResultSet set = Main.executeQuery("SELECT blocked FROM ScarabMailUsers WHERE uuid='" + this.id.toString().replaceAll("-", "") + "'");
 		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("SELECT blocked FROM ScarabMailUsers WHERE uuid=?");
+			st.setString(1, this.getID());
+			ResultSet set = st.executeQuery();
 			if(set.next()){
 				List<String> blocked = new ArrayList<String>(Arrays.asList(set.getString("blocked").split(":")));
 				System.out.println(blocked.size());
 				blocked.add(id);
-				Main.executeUpdate("UPDATE ScarabMailUsers SET blocked='" + StringUtils.join(blocked, ":") + "' WHERE uuid='" + this.id.toString().replaceAll("-", "") + "'");
+				
+				st = Main.getConnection().prepareStatement("UPDATE ScarabMailUsers SET blocked=? WHERE uuid=?");
+				st.setString(1, StringUtils.join(blocked, ":"));
+				st.setString(2, this.getID());
+				st.executeUpdate();
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -55,12 +62,20 @@ public class ScarabPlayer {
 	}
 	
 	public void unblockPlayer(String id){
-		ResultSet set = Main.executeQuery("SELECT blocked FROM ScarabMailUsers WHERE uuid='" + this.id.toString().replaceAll("-", "") + "'");
+		
 		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("SELECT blocked FROM ScarabMailUsers WHERE uuid=?");
+			st.setString(1, this.getID());
+			ResultSet set = st.executeQuery();
 			if(set.next()){
 				List<String> blocked = new ArrayList<String>(Arrays.asList(set.getString("blocked").split(":")));
 				blocked.remove(id);
-				Main.executeUpdate("UPDATE ScarabMailUsers SET blocked='" + StringUtils.join(blocked, ":") + "' WHERE uuid='" + this.id.toString().replaceAll("-", "") + "'");
+				
+				st = Main.getConnection().prepareStatement("UPDATE ScarabMailUsers SET blocked=? WHERE uuid=?");
+				st.setString(1, StringUtils.join(blocked, ":"));
+				st.setString(2, this.getID());
+				st.executeUpdate();
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -70,19 +85,32 @@ public class ScarabPlayer {
 	
 	public MailSendError sendMail(String receiver, String content){
 		receiver = receiver.replaceAll("-", "");
-		ResultSet set = Main.executeQuery("SELECT uuid, username, blocked FROM ScarabMailUsers WHERE username='" + receiver + "'");
+		
+		
+		
 		
 		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("SELECT uuid, username, blocked FROM ScarabMailUsers WHERE username=?");
+			st.setString(1, receiver);
+			
+			
+			ResultSet set = st.executeQuery();
 			if(!set.next()){
 				return MailSendError.NOTEXISTS;
 			}else{
-				if(Arrays.asList(set.getString("blocked").split(":")).contains(id.toString().replaceAll("-", "")) && !this.bypassBlock){
+				if(Arrays.asList(set.getString("blocked").split(":")).contains(this.getID()) && !this.bypassBlock){
 					return MailSendError.BLOCKED;
 				}else{
 					if(!FilterManager.containsFilteredWord(content)){
-						String update = "INSERT INTO ScarabMail (id, content, sender, receiver, date, toname, fromname) VALUES (null, '" + content + "', '" + id.toString().replaceAll("-", "") + "', '" + set.getString("uuid") + "', CURDATE(), '" + receiver + "', '" + this.username + "')";
 						
-						PreparedStatement st = Main.getConnection().prepareStatement(update, Statement.RETURN_GENERATED_KEYS);
+						st = Main.getConnection().prepareStatement("INSERT INTO ScarabMail (id, content, sender, receiver, date, toname, fromname) VALUES (null, ?, ?, ?, CURDATE(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+						st.setString(1,content);
+						st.setString(2, this.getID().replaceAll("-", ""));
+						st.setString(3, set.getString("uuid"));
+						st.setString(4, set.getString("username"));
+						st.setString(5, this.getUsername());
+						
+						
 						st.executeUpdate();
 						
 						ResultSet IDSet = st.getGeneratedKeys();
@@ -114,9 +142,13 @@ public class ScarabPlayer {
 		
 		List<Mail> mails = new ArrayList<Mail>();
 		
-		ResultSet set = Main.executeQuery("SELECT * FROM ScarabMail WHERE receiver='" + id.toString().replaceAll("-", "") + "'");
+		
+		
 		
 		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("SELECT * FROM ScarabMail WHERE receiver=?");
+			st.setString(1, this.getID());
+			ResultSet set = st.executeQuery();
 			while(set.next()){
 				Mail mail = new Mail(set);
 				mails.add(mail);
@@ -129,8 +161,13 @@ public class ScarabPlayer {
 	}
 	
 	public void clearMail(){
-		String update = "DELETE FROM ScarabMail WHERE receiver='" + this.id.toString().replaceAll("-", "") + "'";
-		Main.executeUpdate(update);
+		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("DELETE FROM ScarabMail WHERE receiver=?");
+			st.setString(1, this.getID());
+			st.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

@@ -1,6 +1,7 @@
 package com.scarabcoder.mail.managers;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -93,12 +94,29 @@ public class FilterManager {
 	}
 	
 	public static void addWord(String word){
-		Main.executeUpdate("INSERT INTO ScarabMailFilter (id, word) VALUES (null, '" + word + "')");
+		
+		PreparedStatement st;
+		try {
+			st = Main.getConnection().prepareStatement("INSERT INTO ScarabMailFilter (id, word) VALUES (null, ?)");
+			st.setString(1, word);
+			st.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 		reloadFilter();
 	}
 	
 	public static void removeWord(String word){
-		Main.executeUpdate("DELETE FROM ScarabMailFilter WHERE word='" + word + "'");
+		
+		try {
+			PreparedStatement st = Main.getConnection().prepareStatement("DELETE FROM ScarabMailFilter WHERE word=?");
+			st.setString(1, word);
+			st.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 		reloadFilter();
 	}
 	

@@ -42,31 +42,34 @@ public class MailCommand implements CommandExecutor{
 						if(args.length > 2){
 							// /mail send <user> <content>
 							if(args[0].equalsIgnoreCase(playerArgs.get(0))){
-								
-								List<String> argList = Arrays.asList(args);
-								
-								String message = StringUtils.join(argList.subList(2, argList.size()), " ");
-								
-								
-								MailSendError result = player.sendMail(args[1], message);
-								switch(result){
-								case BLOCKED:
-									p.sendMessage(ChatMessage.BLOCKED);
-									break;
-								case NOTEXISTS:
-									p.sendMessage(ChatMessage.NOTFOUND);
-									break;
-								case FILTERED:
-									p.sendMessage(ChatMessage.FILTERED);
-									for(Player pl : Bukkit.getOnlinePlayers()){
-										if(pl.hasPermission(MailPermissions.LOGS)){
-											p.sendMessage(Main.prefix + ChatColor.RED + p.getName() + " tried sending a message to " + args[1] + " with a filtered word: " + message);
+								if(p.hasPermission(MailPermissions.SENDMAIL)){
+									List<String> argList = Arrays.asList(args);
+									
+									String message = StringUtils.join(argList.subList(2, argList.size()), " ");
+									
+									
+									MailSendError result = player.sendMail(args[1], message);
+									switch(result){
+									case BLOCKED:
+										p.sendMessage(ChatMessage.BLOCKED);
+										break;
+									case NOTEXISTS:
+										p.sendMessage(ChatMessage.NOTFOUND);
+										break;
+									case FILTERED:
+										p.sendMessage(ChatMessage.FILTERED);
+										for(Player pl : Bukkit.getOnlinePlayers()){
+											if(pl.hasPermission(MailPermissions.LOGS)){
+												p.sendMessage(Main.prefix + ChatColor.RED + p.getName() + " tried sending a message to " + args[1] + " with a filtered word: " + message);
+											}
 										}
+										break;
+									case NONE:
+										p.sendMessage(ChatMessage.SENT);
+										break;
 									}
-									break;
-								case NONE:
-									p.sendMessage(ChatMessage.SENT);
-									break;
+								}else{
+									p.sendMessage(ChatMessage.NOPERMS);
 								}
 							}else if(args[0].equalsIgnoreCase(adminArgs.get(1))){
 								if(p.hasPermission(MailPermissions.MODIFYFILTER)){
@@ -199,10 +202,14 @@ public class MailCommand implements CommandExecutor{
 						}
 						
 						
+					}else{
+						sender.sendMessage(ChatMessage.PLAYERCOMMAND);
 					}
 				}else{
 					sender.sendMessage(ChatMessage.INVALIDARGS);
 				}
+			}else{
+				sender.sendMessage(ChatMessage.INVALIDARGS);
 			}
 		}else{
 			sender.sendMessage(ChatMessage.NOPERMS);

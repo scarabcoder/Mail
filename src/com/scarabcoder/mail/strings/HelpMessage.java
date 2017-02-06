@@ -16,12 +16,16 @@ public class HelpMessage {
 		p.sendMessage(Main.prefix + "/mail read" + ChatColor.RESET + ": Read mail.");
 		p.sendMessage(Main.prefix + "/mail clear" + ChatColor.RESET + ": Clear mail in inbox.");
 		p.sendMessage(Main.prefix + "/mail help" + ChatColor.RESET + ": Displays this help text.");
+		p.sendMessage(Main.prefix + "/mail un/block <player>" + ChatColor.RESET + ": Block player from sending you mail.");
 		
 		if(p.hasPermission(MailPermissions.READOTHER)){
 			p.sendMessage(Main.prefix + "/mail readfrom <date>" + ChatColor.RESET + ": Displays mail sent on date (ex: 2017-02-04, YYYY-MM-DD)");
 		}
 		if(p.hasPermission(MailPermissions.MODIFYFILTER)){
 			p.sendMessage(Main.prefix + "/mail filter <add/modify/remove> [keyword/download/upload]" + ChatColor.RESET + ": Add or remove a word, reset database filter by loading from local file (upload) or populating local file from database (download).");
+		}
+		if(p.hasPermission(MailPermissions.REMOVEMAIL)){
+			p.sendMessage(Main.prefix + "/mail remove <id>" + ChatColor.RESET + ": Removes mail with specified ID");
 		}
 		
 		
